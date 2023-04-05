@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { StockType } from '../types/stock.type';
 
 export class CreateStockDto {
   @ApiProperty({
@@ -52,7 +53,7 @@ export class CreateStockDto {
   @ApiProperty({
     type: String,
     required: true,
-    enum: ['google', 'amazon'],
+    enum: Object.values(StockType),
   })
-  stockType: 'google' | 'amazon';
+  stockType: StockType;
 }

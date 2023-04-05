@@ -1,11 +1,9 @@
 import { Command, CommandRunner } from 'nest-commander';
-import { Injectable } from '@nestjs/common';
 import { StocksRepository } from '../../modules/stock/repositories/stock.repository';
 import { amazonStock } from './data/AMZN-stock-price';
 import { googleStock } from './data/GOOG-stock-price';
-import { Stock } from 'src/modules/stock/entities/stock.schema';
-import { Connection } from 'mongoose';
-import { InjectConnection } from '@nestjs/mongoose';
+import { Stock } from '../../modules/stock/entities/stock.schema';
+import { StockType } from '../../modules/stock/types/stock.type';
 
 @Command({
   name: 'seed:stock',
@@ -24,7 +22,7 @@ export class StockSeed extends CommandRunner {
           this.stocksRepository.create({
             ...stock,
             timestamp: new Date(stock.timestamp),
-            stockType: 'amazon',
+            stockType: StockType.AMAZON,
           } as Stock),
         ),
       ),
@@ -33,7 +31,7 @@ export class StockSeed extends CommandRunner {
           this.stocksRepository.create({
             ...stock,
             timestamp: new Date(stock.timestamp),
-            stockType: 'google',
+            stockType: StockType.GOOGLE,
           } as Stock),
         ),
       ),

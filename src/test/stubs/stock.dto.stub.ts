@@ -1,3 +1,4 @@
+import { StockType } from '../../modules/stock/types/stock.type';
 import { CreateStockDto } from '../../modules/stock/dto/create-stock.dto';
 
 export const StockDTOStub = (): CreateStockDto => ({
@@ -9,5 +10,5 @@ export const StockDTOStub = (): CreateStockDto => ({
   lowestPriceOfTheDay: 143.5025,
   timestamp: new Date(1641186000000),
   n: 78529,
-  stockType: 'google',
+  stockType: StockType.GOOGLE,
 });

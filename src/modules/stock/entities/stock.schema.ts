@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { StockType } from '../types/stock.type';
 
 @Schema({
   timestamps: true,
@@ -56,9 +57,9 @@ export class Stock {
   @Prop({
     type: String,
     required: true,
-    enum: ['google', 'amazon'],
+    enum: Object.values(StockType),
   })
-  stockType: 'google' | 'amazon';
+  stockType: StockType;
 }
 
 export type StockDocument = Stock & Document;
