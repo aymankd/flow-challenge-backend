@@ -47,6 +47,13 @@ export class StocksService {
           },
         },
       },
+      {
+        $sort: {
+          '_id.stockType': 1,
+          '_id.year': 1,
+          '_id.month': 1,
+        },
+      },
     ]);
     return result.reduce((acc, curr) => {
       if (!acc[curr._id.stockType]) {

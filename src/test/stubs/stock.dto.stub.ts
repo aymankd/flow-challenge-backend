@@ -1,4 +1,4 @@
-import { StockType } from '../../modules/stock/types/stock.type';
+import { StockByMonth, StockType } from '../../modules/stock/types/stock.type';
 import { CreateStockDto } from '../../modules/stock/dto/create-stock.dto';
 
 export const StockDTOStub = (): CreateStockDto => ({
@@ -11,4 +11,13 @@ export const StockDTOStub = (): CreateStockDto => ({
   timestamp: new Date(1641186000000),
   n: 78529,
   stockType: StockType.GOOGLE,
+});
+
+export const StockByMonthStub = (): StockByMonth => ({
+  _id: {
+    stockType: StockType.GOOGLE,
+    year: 2022,
+    month: 3,
+  },
+  month_price: 100,
 });
