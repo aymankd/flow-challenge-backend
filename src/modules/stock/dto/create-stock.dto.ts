@@ -1,70 +1,58 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
 
-@Schema({
-  timestamps: true,
-})
-export class Stock {
-  @Prop({
+export class CreateStockDto {
+  @ApiProperty({
     type: Number,
     required: true,
   })
   v: number;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   vw: number;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   o: number;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   c: number;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   highestPriceOfTheDay: number;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   lowestPriceOfTheDay: number;
 
-  @Prop({
+  @ApiProperty({
     type: Date,
     required: true,
   })
   timestamp: Date;
 
-  @Prop({
+  @ApiProperty({
     type: Number,
     required: true,
   })
   n: number;
 
-  @Prop({
+  @ApiProperty({
     type: String,
     required: true,
     enum: ['google', 'amazon'],
   })
   stockType: 'google' | 'amazon';
 }
-
-export type StockDocument = Stock & Document;
-
-const StockSchema = SchemaFactory.createForClass(Stock);
-
-StockSchema.index({ stockType: 1, timestamp: 1 }, { unique: true });
-
-export { StockSchema };
