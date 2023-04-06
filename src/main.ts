@@ -60,8 +60,8 @@ export async function setupDevEnvironment(app: INestApplication) {
 
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
-    .setTitle('tri9otrip API')
-    .setDescription('tri9otrip API documentation')
+    .setTitle('flow-challenge API')
+    .setDescription('flow-challenge API documentation')
     .setVersion('0.0.1')
     .addBearerAuth({ type: 'http' })
     .build();

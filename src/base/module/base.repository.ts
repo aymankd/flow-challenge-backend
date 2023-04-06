@@ -7,6 +7,8 @@ import {
   Connection,
   SaveOptions,
   QueryOptions,
+  PipelineStage,
+  AggregateOptions,
 } from 'mongoose';
 
 export class BaseRepository<Base, BaseDocument> {
@@ -81,5 +83,12 @@ export class BaseRepository<Base, BaseDocument> {
     const session = await this.connection.startSession();
     session.startTransaction();
     return session;
+  }
+
+  async aggregate<T>(
+    pipeline: PipelineStage[],
+    options?: AggregateOptions,
+  ): Promise<T[]> {
+    return this.baseModel.aggregate(pipeline, options).exec();
   }
 }

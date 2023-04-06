@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { DatabaseModule } from 'src/database/database.module';
+import { DatabaseModule } from '../database/database.module';
+import { StocksModule } from '../modules/stock/stock.module';
+import { StocksSeedModule } from '../seeds/stock/stock.module';
 
 @Module({
   imports: [
@@ -8,6 +10,8 @@ import { DatabaseModule } from 'src/database/database.module';
       isGlobal: true,
     }),
     DatabaseModule,
+    StocksModule,
+    StocksSeedModule,
   ],
   controllers: [],
   providers: [],
