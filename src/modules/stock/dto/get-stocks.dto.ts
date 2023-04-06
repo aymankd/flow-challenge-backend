@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined, IsDateString } from 'class-validator';
+import {
+  IsDefined,
+  IsDateString,
+  IsNumber,
+  IsEnum,
+  IsNumberString,
+} from 'class-validator';
+import { Stock } from '../entities/stock.schema';
+import { StockType } from '../types/stock.type';
 
 export class GetStocksDto {
   @ApiProperty({
@@ -9,4 +17,23 @@ export class GetStocksDto {
   @IsDateString()
   @IsDefined()
   date: string;
+}
+
+export class GetBestStockTradeDto {
+  @ApiProperty({
+    type: Number,
+    required: true,
+  })
+  @IsNumberString()
+  @IsDefined()
+  budget: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+    enum: StockType,
+  })
+  @IsEnum(StockType)
+  @IsDefined()
+  stockType: StockType;
 }

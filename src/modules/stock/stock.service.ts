@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { CreateStockDto } from './dto/create-stock.dto';
+import { StockDocument } from './entities/stock.schema';
 import { StocksRepository } from './repositories/stock.repository';
-import { StockByMonth } from './types/stock.type';
+import { StockByMonth, StockType } from './types/stock.type';
 
 @Injectable()
 export class StocksService {
@@ -63,5 +64,65 @@ export class StocksService {
       }
       return acc;
     }, new Object() as Record<(typeof result)[number]['_id']['stockType'], (typeof result)[number][]>);
+  }
+
+  async getStockBestTrade(stockType: StockType, budget: number) {
+    const stocks = await this.stocksRepository.findAll(
+      {
+        stockType,
+      },
+      {
+        timestamp: 1,
+      },
+    );
+    const profitableTrades = this.geetProfitableTrades(stocks);
+    return this.getBestTrade(profitableTrades, budget);
+  }
+
+  private geetProfitableTrades(stocks: StockDocument[]) {
+    const profitableTrades: Record<'buy' | 'sell', StockDocument[]> = {
+      buy: [],
+      sell: [],
+    };
+    for (let i = 0; i < stocks.length; i++) {
+      const buyPrice = stocks[i].lowestPriceOfTheDay;
+      for (let j = i + 1; j < stocks.length; j++) {
+        const sellPrice = stocks[j].highestPriceOfTheDay;
+        if (sellPrice > buyPrice) {
+          profitableTrades.buy.push(stocks[i]);
+          profitableTrades.sell.push(stocks[j]);
+        }
+      }
+    }
+    return profitableTrades;
+  }
+
+  private getBestTrade(
+    profitableTrades: Record<'buy' | 'sell', StockDocument[]>,
+    budget: number,
+  ) {
+    const bestTrade: {
+      buyPrice?: number;
+      sellPrice?: number;
+      profit?: number;
+      buyDate?: Date;
+      sellDate?: Date;
+    } = {};
+    let maxProfit = 0;
+    for (let i = 0; i < profitableTrades.buy.length; i++) {
+      const buyPrice = profitableTrades.buy[i].lowestPriceOfTheDay;
+      const sellPrice = profitableTrades.sell[i].highestPriceOfTheDay;
+      const profit = sellPrice - buyPrice;
+      if (profit > maxProfit) {
+        maxProfit = profit;
+        bestTrade.buyPrice = buyPrice;
+        bestTrade.sellPrice = sellPrice;
+        bestTrade.profit =
+          (budget / buyPrice) * sellPrice - (budget / buyPrice) * buyPrice;
+        bestTrade.buyDate = profitableTrades.buy[i].timestamp;
+        bestTrade.sellDate = profitableTrades.sell[i].timestamp;
+      }
+    }
+    return bestTrade;
   }
 }

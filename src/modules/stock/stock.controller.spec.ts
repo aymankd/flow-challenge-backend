@@ -10,6 +10,7 @@ describe('StockController', () => {
   const stocksService = {
     create: jest.fn(),
     getStocksByMonth: jest.fn(),
+    getStockBestTrade: jest.fn(),
   };
 
   beforeAll(async () => {

@@ -173,4 +173,84 @@ describe('StockService', () => {
       expect(result).toEqual({});
     });
   });
+
+  describe('getStockBestTrade', () => {
+    it('should return best trade for specific Stock Type', async () => {
+      const stocksDto: CreateStockDto[] = [];
+      const GoogleStock_1 = StockDTOStub();
+      GoogleStock_1.timestamp = new Date('01/10/2022');
+      GoogleStock_1.stockType = StockType.GOOGLE;
+      GoogleStock_1.highestPriceOfTheDay = 180;
+      GoogleStock_1.lowestPriceOfTheDay = 170;
+      stocksDto.push(GoogleStock_1);
+      const GoogleStock_2 = StockDTOStub();
+      GoogleStock_2.timestamp = new Date('01/20/2022');
+      GoogleStock_2.stockType = StockType.GOOGLE;
+      GoogleStock_2.highestPriceOfTheDay = 170;
+      GoogleStock_2.lowestPriceOfTheDay = 160;
+      stocksDto.push(GoogleStock_2);
+      const GoogleStock_3 = StockDTOStub();
+      GoogleStock_3.timestamp = new Date('02/05/2022');
+      GoogleStock_3.stockType = StockType.GOOGLE;
+      GoogleStock_3.highestPriceOfTheDay = 160;
+      GoogleStock_3.lowestPriceOfTheDay = 120;
+      stocksDto.push(GoogleStock_3);
+      const GoogleStock_4 = StockDTOStub();
+      GoogleStock_4.timestamp = new Date('02/15/2022');
+      GoogleStock_4.stockType = StockType.GOOGLE;
+      GoogleStock_4.highestPriceOfTheDay = 140;
+      GoogleStock_4.lowestPriceOfTheDay = 130;
+      stocksDto.push(GoogleStock_4);
+      const GoogleStock_5 = StockDTOStub();
+      GoogleStock_5.timestamp = new Date('02/20/2022');
+      GoogleStock_5.stockType = StockType.GOOGLE;
+      GoogleStock_5.highestPriceOfTheDay = 165;
+      GoogleStock_5.lowestPriceOfTheDay = 140;
+      stocksDto.push(GoogleStock_5);
+      const GoogleStock_6 = StockDTOStub();
+      GoogleStock_6.timestamp = new Date('03/05/2022');
+      GoogleStock_6.stockType = StockType.GOOGLE;
+      GoogleStock_6.highestPriceOfTheDay = 100;
+      GoogleStock_6.lowestPriceOfTheDay = 80;
+      stocksDto.push(GoogleStock_6);
+      await Promise.all(stocksDto.map((stock) => stocksService.create(stock)));
+      const result = await stocksService.getStockBestTrade(
+        StockType.GOOGLE,
+        100000,
+      );
+      const shares = 100000 / GoogleStock_3.lowestPriceOfTheDay;
+      expect(result).toEqual({
+        buyPrice: GoogleStock_3.lowestPriceOfTheDay,
+        sellPrice: GoogleStock_5.highestPriceOfTheDay,
+        profit:
+          GoogleStock_5.highestPriceOfTheDay * shares -
+          GoogleStock_3.lowestPriceOfTheDay * shares,
+        buyDate: new Date('02/05/2022'),
+        sellDate: new Date('02/20/2022'),
+      });
+    });
+
+    it('should return no best trade for specific Stock Type', async () => {
+      const stocksDto: CreateStockDto[] = [];
+      const GoogleStock_1 = StockDTOStub();
+      GoogleStock_1.timestamp = new Date('01/10/2022');
+      GoogleStock_1.stockType = StockType.GOOGLE;
+      GoogleStock_1.highestPriceOfTheDay = 180;
+      GoogleStock_1.lowestPriceOfTheDay = 170;
+      stocksDto.push(GoogleStock_1);
+      const GoogleStock_2 = StockDTOStub();
+      GoogleStock_2.timestamp = new Date('01/20/2022');
+      GoogleStock_2.stockType = StockType.GOOGLE;
+      GoogleStock_2.highestPriceOfTheDay = 170;
+      GoogleStock_2.lowestPriceOfTheDay = 160;
+      stocksDto.push(GoogleStock_2);
+
+      await Promise.all(stocksDto.map((stock) => stocksService.create(stock)));
+      const result = await stocksService.getStockBestTrade(
+        StockType.GOOGLE,
+        100000,
+      );
+      expect(result).toEqual({});
+    });
+  });
 });
