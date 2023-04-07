@@ -37,3 +37,13 @@ export class GetBestStockTradeDto {
   @IsDefined()
   stockType: StockType;
 }
+
+export class GetBestStockTradesDto {
+  @ApiProperty({
+    type: Number,
+    required: true,
+  })
+  @IsNumberString()
+  @IsDefined()
+  budget: string;
+}
