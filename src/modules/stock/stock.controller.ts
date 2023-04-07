@@ -1,7 +1,11 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { StocksService } from './stock.service';
 import { ApiTags } from '@nestjs/swagger';
-import { GetBestStockTradeDto, GetStocksDto } from './dto/get-stocks.dto';
+import {
+  GetBestStockTradeDto,
+  GetBestStockTradesDto,
+  GetStocksDto,
+} from './dto/get-stocks.dto';
 
 @ApiTags('Stocks')
 @Controller('stocks')
@@ -20,5 +24,12 @@ export class StocksController {
       bestStockTradeDto.stockType,
       +bestStockTradeDto.budget,
     );
+  }
+
+  @Get('StocksBestTrades')
+  async getStockBestTrades(
+    @Query() getBestStockTradesDto: GetBestStockTradesDto,
+  ) {
+    throw new Error('Not implemented Yet');
   }
 }

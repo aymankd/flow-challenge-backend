@@ -198,7 +198,9 @@ export class StocksService {
           wallet,
           quantity: wallet / currentTrade.lowestPriceOfTheDay,
         };
-        wallet += buyTrade.quantity * nextTrade.highestPriceOfTheDay;
+        wallet +=
+          buyTrade.quantity * nextTrade.highestPriceOfTheDay -
+          buyTrade.quantity * currentTrade.lowestPriceOfTheDay;
         const sellTrade: Trade = {
           actionType: ActionType.SELL,
           price: nextTrade.highestPriceOfTheDay,
