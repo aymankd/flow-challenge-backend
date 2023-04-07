@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { CreateStockDto } from './dto/create-stock.dto';
 import { StockDocument } from './entities/stock.schema';
 import { StocksRepository } from './repositories/stock.repository';
-import { StockByMonth, StockType } from './types/stock.type';
+import {
+  ActionType,
+  StockByMonth,
+  StockType,
+  Trade,
+  Trades,
+} from './types/stock.type';
 
 @Injectable()
 export class StocksService {
@@ -75,12 +81,12 @@ export class StocksService {
         timestamp: 1,
       },
     );
-    const profitableTrades = this.geetProfitableTrades(stocks);
+    const profitableTrades = this.getProfitableTrades(stocks);
     return this.getBestTrade(profitableTrades, budget);
   }
 
-  private geetProfitableTrades(stocks: StockDocument[]) {
-    const profitableTrades: Record<'buy' | 'sell', StockDocument[]> = {
+  getProfitableTrades(stocks: StockDocument[]) {
+    const profitableTrades: Trades = {
       buy: [],
       sell: [],
     };
@@ -97,10 +103,7 @@ export class StocksService {
     return profitableTrades;
   }
 
-  private getBestTrade(
-    profitableTrades: Record<'buy' | 'sell', StockDocument[]>,
-    budget: number,
-  ) {
+  private getBestTrade(profitableTrades: Trades, budget: number) {
     const bestTrade: {
       buyPrice?: number;
       sellPrice?: number;
@@ -127,6 +130,124 @@ export class StocksService {
   }
 
   async getStockBestTrades(budget: number) {
-    throw new Error('Not implemented yet');
+    const AmazonStocks = await this.stocksRepository.findAll(
+      {
+        stockType: StockType.AMAZON,
+      },
+      { timestamp: 1 },
+    );
+    const GoogleStocks = await this.stocksRepository.findAll(
+      {
+        stockType: StockType.GOOGLE,
+      },
+      { timestamp: 1 },
+    );
+    const mergedTrades = this.filterProfitableTrades(
+      AmazonStocks,
+      GoogleStocks,
+    );
+    return this.ToRangeTrades(mergedTrades, budget);
+  }
+
+  private filterProfitableTrades(...profitableTrades: StockDocument[][]) {
+    if (profitableTrades.length === 0) return [];
+    if (profitableTrades.length === 1) return profitableTrades[0];
+    const filtredProfitableTrades: StockDocument[] = [];
+    for (let i = 0; i < profitableTrades[0].length; i++) {
+      const trade = this.getProfitableTradFromTrades(profitableTrades, i);
+      if (trade) filtredProfitableTrades.push(trade);
+    }
+    return filtredProfitableTrades;
+  }
+
+  private getProfitableTradFromTrades(
+    profitableTrades: StockDocument[][],
+    index: number,
+  ) {
+    let profit =
+        profitableTrades[0][index].highestPriceOfTheDay -
+        profitableTrades[0][index].lowestPriceOfTheDay,
+      profitableTrade = profitableTrades[0][index];
+    for (let i = 1; i < profitableTrades.length; i++) {
+      const currentProfitableTrade = profitableTrades[i][index];
+      const currentProfit =
+        currentProfitableTrade.highestPriceOfTheDay -
+        currentProfitableTrade.lowestPriceOfTheDay;
+      if (currentProfit > profit) {
+        profit = currentProfit;
+        profitableTrade = currentProfitableTrade;
+      }
+    }
+    if (profit > 0) return profitableTrade;
+    return null;
+  }
+
+  private ToRangeTrades(trades: StockDocument[], startBudget: number) {
+    const tradesList: Trade[] = [];
+    let wallet = startBudget;
+    let currentTrade: StockDocument = trades[0];
+    for (let i = 1; i < trades.length; i++) {
+      const nextTrade = trades[i - 1];
+      const afterNextTrade = trades[i];
+      if (currentTrade.stockType !== afterNextTrade.stockType) {
+        const quantity = Math.floor(wallet / currentTrade.lowestPriceOfTheDay);
+        const buyTrade: Trade = {
+          actionType: ActionType.BUY,
+          price: currentTrade.lowestPriceOfTheDay,
+          date: currentTrade.timestamp,
+          stockType: currentTrade.stockType,
+          wallet,
+          quantity,
+        };
+        wallet +=
+          quantity * nextTrade.highestPriceOfTheDay -
+          quantity * currentTrade.lowestPriceOfTheDay;
+        const sellTrade: Trade = {
+          actionType: ActionType.SELL,
+          price: nextTrade.highestPriceOfTheDay,
+          date: nextTrade.timestamp,
+          stockType: nextTrade.stockType,
+          wallet,
+          quantity,
+        };
+        tradesList.push(buyTrade, sellTrade);
+        currentTrade = afterNextTrade;
+      } else if (i === trades.length - 1) {
+        // last trade
+        if (
+          currentTrade.lowestPriceOfTheDay >=
+          afterNextTrade.highestPriceOfTheDay
+        )
+          break;
+        currentTrade = nextTrade;
+        const quantity = Math.floor(wallet / currentTrade.lowestPriceOfTheDay);
+
+        const buyTrade: Trade = {
+          actionType: ActionType.BUY,
+          price: currentTrade.lowestPriceOfTheDay,
+          date: currentTrade.timestamp,
+          stockType: currentTrade.stockType,
+          wallet,
+          quantity,
+        };
+        wallet +=
+          quantity * afterNextTrade.highestPriceOfTheDay -
+          quantity * currentTrade.lowestPriceOfTheDay;
+        const sellTrade: Trade = {
+          actionType: ActionType.SELL,
+          price: afterNextTrade.highestPriceOfTheDay,
+          date: afterNextTrade.timestamp,
+          stockType: afterNextTrade.stockType,
+          wallet,
+          quantity,
+        };
+        tradesList.push(buyTrade, sellTrade);
+      } else {
+        // skip if day after day is not profitable
+        if (currentTrade.lowestPriceOfTheDay >= nextTrade.highestPriceOfTheDay)
+          currentTrade = nextTrade;
+      }
+    }
+    return tradesList;
   }
 }
