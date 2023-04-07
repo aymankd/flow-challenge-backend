@@ -8,7 +8,7 @@ import { CreateStockDto } from './dto/create-stock.dto';
 import { Stock, StockSchema } from './entities/stock.schema';
 import { StocksRepository } from './repositories/stock.repository';
 import { StocksService } from './stock.service';
-import { StockByMonth, StockType } from './types/stock.type';
+import { ActionType, StockByMonth, StockType } from './types/stock.type';
 
 describe('StockService', () => {
   let stocksService: StocksService;
@@ -251,6 +251,106 @@ describe('StockService', () => {
         100000,
       );
       expect(result).toEqual({});
+    });
+  });
+
+  describe('getStockBestTrades', () => {
+    it('should return best trades for all Stock Types', async () => {
+      const stocksDto: CreateStockDto[] = [];
+      const GoogleStock_1 = StockDTOStub();
+      GoogleStock_1.timestamp = new Date('01/01/2022');
+      GoogleStock_1.stockType = StockType.GOOGLE;
+      GoogleStock_1.highestPriceOfTheDay = 140;
+      GoogleStock_1.lowestPriceOfTheDay = 135;
+      stocksDto.push(GoogleStock_1);
+      const GoogleStock_2 = StockDTOStub();
+      GoogleStock_2.timestamp = new Date('01/02/2022');
+      GoogleStock_2.stockType = StockType.GOOGLE;
+      GoogleStock_2.highestPriceOfTheDay = 160;
+      GoogleStock_2.lowestPriceOfTheDay = 140;
+      stocksDto.push(GoogleStock_2);
+      const GoogleStock_3 = StockDTOStub();
+      GoogleStock_3.timestamp = new Date('01/03/2022');
+      GoogleStock_3.stockType = StockType.GOOGLE;
+      GoogleStock_3.highestPriceOfTheDay = 250;
+      GoogleStock_3.lowestPriceOfTheDay = 160;
+      stocksDto.push(GoogleStock_3);
+      const AmazonStock_1 = StockDTOStub();
+      AmazonStock_1.timestamp = new Date('01/01/2022');
+      AmazonStock_1.stockType = StockType.AMAZON;
+      AmazonStock_1.highestPriceOfTheDay = 210;
+      AmazonStock_1.lowestPriceOfTheDay = 200;
+      stocksDto.push(AmazonStock_1);
+      const AmazonStock_2 = StockDTOStub();
+      AmazonStock_2.timestamp = new Date('01/02/2022');
+      AmazonStock_2.stockType = StockType.AMAZON;
+      AmazonStock_2.highestPriceOfTheDay = 215;
+      AmazonStock_2.lowestPriceOfTheDay = 210;
+      stocksDto.push(AmazonStock_2);
+      const AmazonStock_3 = StockDTOStub();
+      AmazonStock_3.timestamp = new Date('01/03/2022');
+      AmazonStock_3.stockType = StockType.AMAZON;
+      AmazonStock_3.highestPriceOfTheDay = 190;
+      AmazonStock_3.lowestPriceOfTheDay = 180;
+      stocksDto.push(AmazonStock_3);
+      await Promise.all(stocksDto.map((stock) => stocksService.create(stock)));
+      const result = await stocksService.getStockBestTrades(100000);
+      expect(result).toEqual([
+        expect.objectContaining({
+          actionType: ActionType.BUY,
+          price: 200,
+          date: AmazonStock_1.timestamp,
+          stockType: StockType.AMAZON,
+        }),
+        expect.objectContaining({
+          actionType: ActionType.SELL,
+          price: 210,
+          date: AmazonStock_1.timestamp,
+          stockType: StockType.AMAZON,
+        }),
+        expect.objectContaining({
+          actionType: ActionType.BUY,
+          price: 140,
+          date: GoogleStock_2.timestamp,
+          stockType: StockType.GOOGLE,
+        }),
+        expect.objectContaining({
+          actionType: 'sell',
+          price: 250,
+          date: GoogleStock_3.timestamp,
+          stockType: StockType.GOOGLE,
+        }),
+      ]);
+    });
+    it('should return empty list', async () => {
+      const stocksDto: CreateStockDto[] = [];
+      const GoogleStock_1 = StockDTOStub();
+      GoogleStock_1.timestamp = new Date('01/01/2022');
+      GoogleStock_1.stockType = StockType.GOOGLE;
+      GoogleStock_1.highestPriceOfTheDay = 180;
+      GoogleStock_1.lowestPriceOfTheDay = 170;
+      stocksDto.push(GoogleStock_1);
+      const GoogleStock_2 = StockDTOStub();
+      GoogleStock_2.timestamp = new Date('01/02/2022');
+      GoogleStock_2.stockType = StockType.GOOGLE;
+      GoogleStock_2.highestPriceOfTheDay = 160;
+      GoogleStock_2.lowestPriceOfTheDay = 130;
+      stocksDto.push(GoogleStock_2);
+      const AmazonStock_1 = StockDTOStub();
+      AmazonStock_1.timestamp = new Date('01/01/2022');
+      AmazonStock_1.stockType = StockType.AMAZON;
+      AmazonStock_1.highestPriceOfTheDay = 150;
+      AmazonStock_1.lowestPriceOfTheDay = 140;
+      stocksDto.push(AmazonStock_1);
+      const AmazonStock_2 = StockDTOStub();
+      AmazonStock_2.timestamp = new Date('01/02/2022');
+      AmazonStock_2.stockType = StockType.AMAZON;
+      AmazonStock_2.highestPriceOfTheDay = 130;
+      AmazonStock_2.lowestPriceOfTheDay = 100;
+      stocksDto.push(AmazonStock_2);
+      await Promise.all(stocksDto.map((stock) => stocksService.create(stock)));
+      const result = await stocksService.getStockBestTrades(100000);
+      expect(result).toEqual([]);
     });
   });
 });

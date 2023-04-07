@@ -125,4 +125,8 @@ export class StocksService {
     }
     return bestTrade;
   }
+
+  async getStockBestTrades(budget: number) {
+    throw new Error('Not implemented yet');
+  }
 }
