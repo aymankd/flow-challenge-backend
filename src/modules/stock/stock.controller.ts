@@ -30,6 +30,11 @@ export class StocksController {
   async getStockBestTrades(
     @Query() getBestStockTradesDto: GetBestStockTradesDto,
   ) {
-    throw new Error('Not implemented Yet');
+    const start = performance.now();
+    const trades = await this.stocksService.getStockBestTrades(
+      +getBestStockTradesDto.budget,
+    );
+    const end = performance.now() - start;
+    return { trades, time: end };
   }
 }
