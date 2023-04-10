@@ -190,24 +190,25 @@ export class StocksService {
       const nextTrade = trades[i - 1];
       const afterNextTrade = trades[i];
       if (currentTrade.stockType !== afterNextTrade.stockType) {
+        const quantity = Math.floor(wallet / currentTrade.lowestPriceOfTheDay);
         const buyTrade: Trade = {
           actionType: ActionType.BUY,
           price: currentTrade.lowestPriceOfTheDay,
           date: currentTrade.timestamp,
           stockType: currentTrade.stockType,
           wallet,
-          quantity: wallet / currentTrade.lowestPriceOfTheDay,
+          quantity,
         };
         wallet +=
-          buyTrade.quantity * nextTrade.highestPriceOfTheDay -
-          buyTrade.quantity * currentTrade.lowestPriceOfTheDay;
+          quantity * nextTrade.highestPriceOfTheDay -
+          quantity * currentTrade.lowestPriceOfTheDay;
         const sellTrade: Trade = {
           actionType: ActionType.SELL,
           price: nextTrade.highestPriceOfTheDay,
           date: nextTrade.timestamp,
           stockType: nextTrade.stockType,
           wallet,
-          quantity: buyTrade.quantity,
+          quantity,
         };
         tradesList.push(buyTrade, sellTrade);
         currentTrade = afterNextTrade;
@@ -219,22 +220,25 @@ export class StocksService {
         )
           break;
         currentTrade = nextTrade;
+        const quantity = Math.floor(wallet / currentTrade.lowestPriceOfTheDay);
         const buyTrade: Trade = {
           actionType: ActionType.BUY,
           price: currentTrade.lowestPriceOfTheDay,
           date: currentTrade.timestamp,
           stockType: currentTrade.stockType,
           wallet,
-          quantity: wallet / currentTrade.lowestPriceOfTheDay,
+          quantity,
         };
-        wallet += buyTrade.quantity * afterNextTrade.highestPriceOfTheDay;
+        wallet +=
+          quantity * afterNextTrade.highestPriceOfTheDay -
+          quantity * currentTrade.lowestPriceOfTheDay;
         const sellTrade: Trade = {
           actionType: ActionType.SELL,
           price: afterNextTrade.highestPriceOfTheDay,
           date: afterNextTrade.timestamp,
           stockType: afterNextTrade.stockType,
           wallet,
-          quantity: buyTrade.quantity,
+          quantity,
         };
         tradesList.push(buyTrade, sellTrade);
       } else {
