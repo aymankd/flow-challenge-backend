@@ -221,7 +221,6 @@ export class StocksService {
           break;
         currentTrade = nextTrade;
         const quantity = Math.floor(wallet / currentTrade.lowestPriceOfTheDay);
-
         const buyTrade: Trade = {
           actionType: ActionType.BUY,
           price: currentTrade.lowestPriceOfTheDay,
